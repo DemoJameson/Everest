@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Input.Touch;
 using Monocle;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -335,8 +336,12 @@ namespace Celeste.Mod {
         public static bool IsUp(this TouchLocationState state)
             => state == TouchLocationState.Released || state == TouchLocationState.Invalid;
 
+        private static readonly ConcurrentBag<string> _SafeTypes = new ConcurrentBag<string>();
         public static bool IsSafe(this Type type) {
             try {
+                if (_SafeTypes.Contains(type.AssemblyQualifiedName))
+                    return true;
+
                 // "Probe" the type
                 _ = type.Name;
                 _ = type.Assembly.FullName;
@@ -348,6 +353,7 @@ namespace Celeste.Mod {
                 if (!type.BaseType?.IsSafe() ?? false)
                     return false;
 
+                _SafeTypes.Add(type.AssemblyQualifiedName);
                 return true;
             } catch {
                 return false;
