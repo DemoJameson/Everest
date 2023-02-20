@@ -470,8 +470,8 @@ namespace MonoMod {
                         // Operation instructions remain unaffected
                         stackDepth++;
                     } else if (instr.MatchLdcR4(out float v)) {
-                        // ldc.r4 <constant> -> ldc.r8
-                        context.Instrs[instrIdx] = Instruction.Create(OpCodes.Ldc_R8, (double) v);
+                        // ldc.r4 <constant> -> ...; conv.r8
+                        context.Instrs.Insert(instrIdx+1, Instruction.Create(OpCodes.Conv_R8));
                         stackDepth--;
                     } else if (instr.MatchLdloc(out int idx)) {
                         // ldloc <variable> -> ...; conv.r8
@@ -485,5 +485,6 @@ namespace MonoMod {
                 }
             }
         }
+
     }
 }
